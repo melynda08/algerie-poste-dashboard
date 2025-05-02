@@ -1,0 +1,1 @@
+{"embedding_provider": "local", "embedding_model": "all-MiniLM-L6-v2", "embedding_dim": 384, "document_count": 9999}

@@ -1,33 +1,24 @@
 import pandas as pd
-from sqlalchemy import text
-from app.database import get_db
+from app.csv_processor import get_csv_data, get_csv_as_string, search_csv_data
+from typing import Optional, List, Dict
 
-def get_event_data_as_string():
-    with get_db() as db:
-        # Get receptacle events
-        receptacle_events = db.execute(text("""
-            SELECT event_timestamp, facility, next_facility, event_details
-            FROM receptacle_event
-            ORDER BY event_timestamp DESC
-            LIMIT 50
-        """)).fetchall()
+def get_event_data_from_csv(file_id: str, user_id: str) -> str:
+    """Get event data from CSV file as a formatted string"""
+    return get_csv_as_string(file_id, user_id)
 
-        # Get mail item events
-        mail_events = db.execute(text("""
-            SELECT event_timestamp, facility, next_facility, event_details
-            FROM mail_item_event
-            ORDER BY event_timestamp DESC
-            LIMIT 50
-        """)).fetchall()
+def search_logistics_data(file_id: str, user_id: str, query: str) -> pd.DataFrame:
+    """Search logistics data in CSV file"""
+    return search_csv_data(file_id, user_id, query)
 
-    # Combine results
-    combined = [dict(row) for row in receptacle_events + mail_events]
-    
-    # Create DataFrame
-    df = pd.DataFrame(combined)
-    return df.to_string(index=False)
+def get_event_data_as_df(file_id: str, user_id: str) -> pd.DataFrame:
+    """Get event data from CSV file as a DataFrame"""
+    return get_csv_data(file_id, user_id)
 
-def get_event_data_as_df():
-    return pd.DataFrame(columns=[
-        "event_timestamp", "facility", "next_facility", "event_details"
-    ])  # Actual implementation same as above but returns DataFrame
+def get_csv_metadata(file_id: str, user_id: str) -> Dict:
+    """Get metadata about a CSV file"""
+    df = get_csv_data(file_id, user_id)
+    return {
+        'columns': list(df.columns),
+        'row_count': len(df),
+        'sample': df.head(5).to_dict(orient='records')
+    }

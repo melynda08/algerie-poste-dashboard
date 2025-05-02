@@ -26,55 +26,14 @@ class UserQueryHistory(Base):
     question = Column(Text, nullable=False)
     response = Column(Text, nullable=False)
     timestamp = Column(DateTime(timezone=True), server_default=func.now())
+    file_id = Column(String(36), nullable=True)  # Added to track which CSV file was used
 
-class Receptacle(Base):
-    __tablename__ = "receptacle"
-    receptacle_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    receptacle_identifier = Column(String(100), unique=True, nullable=False)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    origin_facility = Column(String(100))
-    destination_facility = Column(String(100))
-    status = Column(String(50), nullable=False)
-    last_updated = Column(DateTime(timezone=True), server_default=func.now())
-
-class MailItem(Base):
-    __tablename__ = "mail_item"
-    mail_item_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    mail_item_identifier = Column(String(100), unique=True, nullable=False)
-    receptacle_id = Column(PG_UUID(as_uuid=True), ForeignKey('receptacle.receptacle_id', ondelete='SET NULL'))
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-    origin_facility = Column(String(100))
-    destination_facility = Column(String(100))
-    status = Column(String(50), nullable=False)
-    last_updated = Column(DateTime(timezone=True), server_default=func.now())
-
-class EventType(Base):
-    __tablename__ = "event_type"
-    event_type_id = Column(Integer, primary_key=True)
-    event_code = Column(String(10), unique=True, nullable=False)
-    event_name = Column(String(255), nullable=False)
-    event_description = Column(Text)
-    is_receptacle_event = Column(Boolean, default=False)
-    is_mail_item_event = Column(Boolean, default=False)
-
-class ReceptacleEvent(Base):
-    __tablename__ = "receptacle_event"
-    event_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    receptacle_id = Column(PG_UUID(as_uuid=True), ForeignKey('receptacle.receptacle_id', ondelete='CASCADE'), nullable=False)
-    event_type_id = Column(Integer, ForeignKey('event_type.event_type_id', ondelete='CASCADE'), nullable=False)
-    event_timestamp = Column(DateTime(timezone=True), nullable=False)
-    facility = Column(String(100))
-    next_facility = Column(String(100))
-    event_details = Column(JSON)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
-
-class MailItemEvent(Base):
-    __tablename__ = "mail_item_event"
-    event_id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    mail_item_id = Column(PG_UUID(as_uuid=True), ForeignKey('mail_item.mail_item_id', ondelete='CASCADE'), nullable=False)
-    event_type_id = Column(Integer, ForeignKey('event_type.event_type_id', ondelete='CASCADE'), nullable=False)
-    event_timestamp = Column(DateTime(timezone=True), nullable=False)
-    facility = Column(String(100))
-    next_facility = Column(String(100))
-    event_details = Column(JSON)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+class CSVFileRecord(Base):
+    __tablename__ = "csv_file_record"
+    file_id = Column(String(36), primary_key=True)
+    user_id = Column(PG_UUID(as_uuid=True), ForeignKey('app_user.user_id', ondelete='CASCADE'), nullable=False)
+    filename = Column(String(255), nullable=False)
+    upload_path = Column(String(512), nullable=False)
+    uploaded_at = Column(DateTime(timezone=True), server_default=func.now())
+    row_count = Column(Integer, nullable=True)
+    columns = Column(JSON, nullable=True)

@@ -1,0 +1,196 @@
+﻿1;FR;Réception d'envoi du client (Srt)
+2;FR;Expédier envoi à adresse nationale (Srt)
+3;FR;Recevoir envoi au bureau d'échange (Srt)
+4;FR;Expédier envoi à la douane (Srt)
+5;FR;Recevoir envoi au lieu (Srt)
+6;FR;Enregistrer raison de rétention d'envoi par la douane (Srt)
+7;FR;Renvoyer envoi de la douane (Srt)
+8;FR;Insérer envoi dans sac (Srt)
+9;FR;Supprimer envoi du sac (Srt)
+10;FR;Enregistrer détails d'envoi (Srt)
+11;FR;Enregistrer détails d'envoi au bureau d'échange (Srt)
+12;FR;Expédition d'envoi à l'étranger (EDI-reçu)
+13;FR;Insérer envoi dans sac intérieur
+14;FR;Supprimer envoi de sac intérieur
+15;FR;Annuler exportation d'envoi
+30;FR;Recevoir envoi au bureau d'échange (Ent)
+31;FR;Expédier envoi à la douane (Ent)
+32;FR;Recevoir envoi au bureau de livraison (Ent)
+33;FR;Recevoir envoi au lieu (Ent)
+34;FR;Enregistrer informations douanières d'envoi (Ent)
+35;FR;Expédier envoi à adresse nationale (Ent)
+36;FR;Vaine tentative de livraison d'envoi (Ent)
+37;FR;Livraison d'envoi (Ent)
+38;FR;Renvoyer envoi de la douane (Ent)
+39;FR;Transmettre envoi à l'agent de livraison (Ent)
+40;FR;Recevoir envoi de l'étranger (EDI-reçu)
+41;FR;Enregistrer détails du destinataire (Ent)
+42;FR;Recevoir envoi au bureau d'échange (Ent -  Int - Rappr)
+43;FR;Recevoir envoi au bureau d'échange (Ent -  Dom - Rappr)
+44;FR;Réception automatique d'envoi au bureau d'échange (Ent)
+45;FR;Création automatique d'envoi manquant (Ent)
+60;FR;Mettre à jour envoi (Srt)
+61;FR;Mettre à jour envoi (Ent)
+62;FR;Correction évt PSD d'envoi (Srt)
+63;FR;Correction évt PSD d'envoi (Ent)
+64;FR;Envoi sur manifeste expédié au lieu (Ent)
+65;FR;Envoi sur manifeste expédié à la douane (Ent)
+66;FR;Envoi sur manifeste reçu au lieu (Ent)
+67;FR;Envoi sur manifeste transmis à agent de livraison (Ent)
+68;FR;Réception automatique d'envoi - aucun scannage
+69;FR;Garder envoi au bureau d'échange (Srt)
+70;FR;Garder envoi au bureau d'échange (Ent)
+71;FR;Recevoir envoi au centre de tri (Ent)
+72;FR;Expédier envoi hors du centre de tri (Ent)
+73;FR;Garder envoi au point de livraison (Ent)
+74;FR;Expédier envoi pour livraison physique (Ent)
+75;FR;Envoi arrivé au point de collecte (Ent)
+76;FR;Arrêter importation d'envoi (Ent)
+77;FR;Envoi inséré dans un récipient externe (Srt)
+100;FR;Créer récipient (Srt)
+101;FR;Fermer récipient (Srt)
+102;FR;Rouvrir récipient (Srt)
+103;FR;Expédition de récipient à une adresse nationale (Srt)
+104;FR;Réception de récipient envoyé par bureau (Srt)
+105;FR;Modifier expédition du récipient (Srt)
+106;FR;Expédition de récipient à l'étranger (Srt)
+107;FR;Expédition de récipient à l'étranger (PREDES EDI-reçu)
+108;FR;Expédition de récipient à l'étranger (PRECON EDI-reçu)
+130;FR;Réception de récipient de l'étranger (Ent)
+131;FR;Ouvrir récipient (Ent)
+132;FR;Expédition de récipient à une adresse nationale (Ent)
+133;FR;Réception de récipient à une adresse nationale (Ent)
+134;FR;Réception de récipient de l'étranger (RESDES EDI-reçu)
+135;FR;Réception de récipient de l'étranger (RESCON EDI-reçu)
+136;FR;Scannage du récip. non finalisé
+137;FR;Scannage du récip. finalisé
+160;FR;Marquer récipient comme supprimé
+161;FR;Récipient chez transporteur (EDI reçu)
+169;FR;Mettre à jour récipient (Srt)
+170;FR;Mettre à jour récipient (Ent)
+171;FR;Correction évt PSD de récipient (Srt)
+172;FR;Correction évt PSD (Ent)
+173;FR;Manifeste : récipient reçu (Ent)
+174;FR;Manifeste : récipient envoyé (Ent)
+175;FR;RESDIT accepté (créer)
+176;FR;Modifier conteneur du récipient (Srt)
+177;FR;Modifier expédition intérieure
+178;EN;Receptacle evaluated for sampling
+178;FR;Récipient évalué pour échantillonnage
+179;FR;Récipient reçu de l'étranger en transbordement direct (Ent.)
+180;FR;Marquer comme transporté en dehors d'une expédition
+181;FR;Récipient pesé à partir de la balance
+200;FR;Créer dépêche (Srt)
+201;FR;Fermer dépêche (Srt)
+202;FR;Rouvrir dépêche (Srt)
+203;FR;Modifier expédition de dépêche (Srt)
+204;FR;Expédier dépêche à l'étranger (EDI-reçu)
+230;FR;Recevoir dépêche de l'étranger (EDI-reçu)
+260;FR;Marquer dépêche comme supprimée
+261;FR;Mettre à jour dépêche (Srt)
+262;FR;Mettre à jour dépêche (Ent)
+300;FR;Créer expédition (Srt)
+301;FR;Fermer expédition (Srt)
+302;FR;Rouvrir expédition (Srt)
+303;FR;Expédier à l'étranger (EDI-reçu)
+330;FR;Recevoir expédition de l'étranger (EDI-reçu)
+360;FR;Expédition chez le transporteur (EDI-reçu)
+368;FR;Mettre à jour expédition (Srt)
+369;FR;Marquer expédition comme supprimée
+370;FR;Mettre à jour expédition (Ent)
+400;FR;Créer sac interne (Srt)
+401;FR;Fermer sac interne (Srt)
+402;FR;Ajouter sac interne au récipient (Srt)
+403;FR;Supprimer sac interne du récipient (Srt)
+404;FR;Rouvrir sac interne (Srt)
+430;FR;Recevoir sac interne (Ent)
+431;FR;Ouvrir sac interne (Ent)
+460;FR;Marquer sac interne comme supprimé
+500;FR;Créer propre BV
+501;FR;Expédier BV à partenaire
+502;FR;Recevoir BV accepté par partenaire
+503;FR;Recevoir BV noté par partenaire
+504;FR;Mettre à jour propre BV
+530;FR;Recevoir BV de partenaire
+531;FR;Accepter BV
+532;FR;Noter BV
+533;FR;Mettre à jour BV reçu
+536;FR;Accepter eBV reçu
+540;FR;Importé à partir du fichier XML
+560;FR;Marquer BV comme supprimé
+600;FR;Créer récipient intérieur
+601;FR;Fermer récipient intérieur
+602;FR;Rouvrir récipient intérieur
+603;FR;Expédition de récipient intérieur au lieu
+604;FR;Recevoir récipient intérieur à cet endroit
+605;FR;Modifier expédition intérieure
+700;FR;Créer dépêche intérieure
+701;FR;Fermer dépêche intérieure
+702;FR;Rouvrir dépêche intérieure
+703;FR;Marquer dépêche intérieure comme supprimée
+730;FR;Créer expédition intérieure
+731;FR;Fermer expédition intérieure
+732;FR;Rouvrir expédition intérieure
+734;FR;Marquer expédition comme supprimée
+750;FR;EDI reçu
+751;FR;Créer/mettre à jour conteneur
+752;FR;Recevoir conteneur (Ent)
+753;FR;Ouvrir conteneur (Ent)
+754;FR;Scanné à transporter
+800;FR;Création/mise à jour automatique à partir du processus de srt
+801;FR;Création/mise à jour à partir de saisie de document
+802;FR;Modification par BV
+803;FR;Marquer comme supprimé
+804;FR;Doc comptable avec formulaire comptable
+805;FR;Modification (admin) selon saisie doc
+806;FR;Création/mise à jour automatique à partir de PREDES
+807;FR;Création automatique à partir d'estimation
+808;FR;Modification (admin) selon BV
+809;FR;Explicable, pas dans formulaire
+810;FR;Validation de document
+811;FR;Invalidation de document
+812;FR;Modifier ident
+850;FR;Créer relevé
+851;FR;Envoyer relevé
+852;FR;Accuser réception du relevé
+854;FR;Paiement reçu
+855;FR;Marquer relevé comme supprimé
+856;FR;Mettre à jour relevé
+900;FR;Créer réclamation (Srt)
+901;FR;Mettre à jour réclamation (Srt)
+902;FR;Envoyer réclamation (Srt)
+903;FR;Envoyer copie de réclamation (Srt)
+904;FR;Réception de commentaire (Srt)
+905;FR;Réception de réponse finale (Srt)
+910;FR;Réception de réclamation (Ent)
+911;FR;Mettre à jour réclamation (Ent)
+912;FR;Envoi de commentaire (Ent)
+913;FR;Envoi de réponse finale (Ent)
+914;FR;Enregistrer réclamation avec formulaire officiel
+915;FR;Modifier réclamation après enregistrement
+920;FR;Marquer réclamation comme supprimée
+950;FR;Générer
+951;FR;Recevoir
+952;FR;Création automatique 'à partir de dépêches sortantes validées'
+953;FR;Mettre à jour
+954;FR;Contester
+955;FR;Accepter
+956;FR;Marquer comme supprimé
+957;FR;Compte
+958;FR;Modification après enregistrement
+959;FR;Créer à partir de SAP
+961;FR;Exporter vers SAP
+980;FR;Créer/mettre à jour
+981;FR;Créer à partir de SAP
+983;FR;Contester
+984;FR;Accepter
+985;FR;Exporter vers SAP
+986;FR;Marquer comme supprimé
+999;FR;Inutilisé
+1000;FR;Manifeste : réception d'envoi du client (Srt)
+1001;FR;Manifeste : insertion d'envoi dans sac (Srt)
+1100;FR;Manifeste : fermer récipient (Srt)
+1101;FR;Manifeste : récipient envoyé du bureau (Srt)
+1102;FR;Générer avis d'arrivée
+1103;EN;Avis arrivée imprimé
+1104;EN;Avis arrive imprim

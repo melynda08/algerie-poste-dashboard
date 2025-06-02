@@ -611,6 +611,9 @@ class RAGModel:
             "mentioned_mail_items": set()
         }
         
+        # Extract all numbers from the query to catch potential event codes
+        potential_codes = re.findall(r'\b\d+\b', query)
+        
         # Check for event code/type intent
         if any(term in query_lower for term in ["event code", "event type", "code", "event"]):
             intent["is_about_event_type"] = True
@@ -621,6 +624,20 @@ class RAGModel:
                 if code_str in query or f"code {code_str}" in query_lower:
                     intent["is_about_event_code"] = True
                     intent["mentioned_event_codes"].add(code_str)
+            
+            # Also check all numbers in the query as potential event codes
+            for code in potential_codes:
+                if code in self.metadata["event_codes"]:
+                    intent["is_about_event_code"] = True
+                    intent["mentioned_event_codes"].add(code)
+        
+        # Even if not explicitly asking about event codes, check if numbers match event codes
+        elif potential_codes:
+            for code in potential_codes:
+                if code in self.metadata["event_codes"]:
+                    intent["is_about_event_code"] = True
+                    intent["is_about_event_type"] = True
+                    intent["mentioned_event_codes"].add(code)
         
         # Check for establishment intent
         if any(term in query_lower for term in ["establishment", "postal", "office", "bureau"]):
@@ -665,6 +682,9 @@ class RAGModel:
         if self.original_df is None:
             return results
         
+        # Extract all numbers from the query to catch potential event codes
+        potential_codes = re.findall(r'\b\d+\b', query)
+        
         # For event code queries, find documents about those specific codes
         if intent["is_about_event_code"] and intent["mentioned_event_codes"]:
             for code in intent["mentioned_event_codes"]:
@@ -691,6 +711,34 @@ class RAGModel:
                             # Limit to a few examples
                             if len(results) >= 3:
                                 break
+        
+        # Check for potential event codes in the query even if not explicitly asking about them
+        elif potential_codes:
+            for code in potential_codes:
+                if code in self.metadata["event_codes"]:
+                    # Find event code summary documents
+                    for doc in self.documents:
+                        if doc.get("doc_type") == "event_code_summary" and str(doc["metadata"].get("event_code")) == code:
+                            results.append({
+                                'content': doc["text"],
+                                'metadata': doc["metadata"],
+                                'similarity': 0.95,  # High confidence for exact matches
+                                'source': 'keyword_number'
+                            })
+                    
+                    # If no summary document, find example rows with this code
+                    if not any(r.get('source') == 'keyword_number' for r in results):
+                        for doc in self.documents:
+                            if doc.get("doc_type") == "row" and str(doc["metadata"].get("EVENT_TYPE_CD")) == code:
+                                results.append({
+                                    'content': doc["text"],
+                                    'metadata': doc["metadata"],
+                                    'similarity': 0.85,  # High confidence but not a summary
+                                    'source': 'keyword_number'
+                                })
+                                # Limit to a few examples
+                                if len([r for r in results if r.get('source') == 'keyword_number']) >= 3:
+                                    break
         
         # For mail item queries, find documents about those specific items
         elif intent["is_about_mail_item"] and intent["mentioned_mail_items"]:
@@ -762,6 +810,42 @@ class RAGModel:
         
         return results
     
+    def _direct_lookup_event_code(self, query: str) -> Optional[Dict[str, Any]]:
+        """
+        Perform a direct lookup for event codes in the query
+        
+        Args:
+            query: The user query
+            
+        Returns:
+            Event code information if found, None otherwise
+        """
+        if self.original_df is None or 'EVENT_TYPE_CD' not in self.original_df.columns:
+            return None
+            
+        # Extract all numbers from the query
+        potential_codes = re.findall(r'\b\d+\b', query)
+        
+        for code in potential_codes:
+            # Check if this code exists in our data
+            matching_rows = self.original_df[self.original_df['EVENT_TYPE_CD'].astype(str) == code]
+            
+            if not matching_rows.empty:
+                # Get the event type name if available
+                event_name = None
+                if 'EVENT_TYPE_NM' in matching_rows.columns:
+                    event_names = matching_rows['EVENT_TYPE_NM'].dropna().unique()
+                    if len(event_names) > 0:
+                        event_name = event_names[0]
+                
+                return {
+                    "event_code": code,
+                    "event_name": event_name,
+                    "count": len(matching_rows)
+                }
+        
+        return None
+    
     def retrieve_context(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
         """
         Retrieve relevant context based on query using hybrid search
@@ -780,36 +864,55 @@ class RAGModel:
             # Initialize results list
             results = []
             
-            # 1. Detect query intent
+            # 1. Try direct lookup for event codes first
+            direct_lookup = self._direct_lookup_event_code(query)
+            if direct_lookup:
+                # Create a special document for this direct lookup
+                direct_text = f"Event Code: {direct_lookup['event_code']}\n"
+                if direct_lookup['event_name']:
+                    direct_text += f"Event Type Name: {direct_lookup['event_name']}\n"
+                direct_text += f"Number of records: {direct_lookup['count']}"
+                
+                results.append({
+                    'content': direct_text,
+                    'metadata': direct_lookup,
+                    'similarity': 1.0,  # Highest confidence for direct lookups
+                    'source': 'direct_lookup'
+                })
+                
+                # Also find the corresponding event code summary document
+                for doc in self.documents:
+                    if (doc.get("doc_type") == "event_code_summary" and 
+                        str(doc["metadata"].get("event_code")) == direct_lookup['event_code']):
+                        results.append({
+                            'content': doc["text"],
+                            'metadata': doc["metadata"],
+                            'similarity': 0.99,  # High confidence for exact matches
+                            'source': 'direct_lookup_summary'
+                        })
+                        break
+            
+            # 2. Detect query intent
             intent = self._detect_query_intent(query)
             logger.info(f"Detected query intent: {intent}")
             
-            # 2. Try keyword search first for specific intents
+            # 3. Try keyword search for specific intents
             keyword_results = self._keyword_search(query, intent)
             
             # If we got good keyword results, use them
             if keyword_results:
                 logger.info(f"Found {len(keyword_results)} results via keyword search")
                 results.extend(keyword_results)
-                
-                # If we have enough results from keyword search, return them
-                if len(results) >= top_k:
-                    return results[:top_k]
-                
-                # Otherwise, we'll supplement with vector search
-                remaining_k = top_k - len(results)
-            else:
-                remaining_k = top_k
             
-            # 3. Perform vector search
+            # 4. Perform vector search to supplement results
             # Get query embedding
             query_embedding = np.array([self._get_embedding_for_text(query)], dtype=np.float32)
             
             # Normalize for cosine similarity
             faiss.normalize_L2(query_embedding)
             
-            # Search index
-            scores, indices = self.index.search(query_embedding, min(remaining_k * 2, len(self.documents)))
+            # Search index - get more results than needed to ensure diversity
+            scores, indices = self.index.search(query_embedding, min(top_k * 3, len(self.documents)))
             
             # Process vector search results
             vector_results = []
@@ -819,7 +922,7 @@ class RAGModel:
                 
                 doc = self.documents[idx]
                 
-                # Skip documents we already found via keyword search
+                # Skip documents we already found via keyword search or direct lookup
                 already_included = False
                 for existing_doc in results:
                     if existing_doc.get('content') == doc["text"]:
@@ -834,10 +937,10 @@ class RAGModel:
                         'source': 'vector'
                     })
             
-            # 4. Add vector results to supplement keyword results
-            results.extend(vector_results[:remaining_k])
+            # 5. Add vector results to supplement other results
+            results.extend(vector_results)
             
-            # 5. For event code queries, ensure diversity of event codes
+            # 6. For event code queries, ensure diversity of event codes
             if intent["is_about_event_type"] and not intent["mentioned_event_codes"]:
                 # Check if we have at least one example of each event code
                 covered_codes = set()
@@ -874,7 +977,32 @@ class RAGModel:
             
             # Sort by similarity and return top_k
             results.sort(key=lambda x: x['similarity'], reverse=True)
-            return results[:top_k]
+            
+            # Ensure we have at least one result for each mentioned event code
+            if intent["is_about_event_code"] and intent["mentioned_event_codes"]:
+                final_results = []
+                covered_codes = set()
+                
+                # First add results for mentioned event codes
+                for result in results:
+                    event_code = None
+                    if 'event_code' in result['metadata']:
+                        event_code = str(result['metadata']['event_code'])
+                    elif 'EVENT_TYPE_CD' in result['metadata']:
+                        event_code = str(result['metadata']['EVENT_TYPE_CD'])
+                    
+                    if event_code in intent["mentioned_event_codes"] and event_code not in covered_codes:
+                        final_results.append(result)
+                        covered_codes.add(event_code)
+                
+                # Then add other results up to top_k
+                for result in results:
+                    if result not in final_results and len(final_results) < top_k:
+                        final_results.append(result)
+                
+                return final_results[:top_k]
+            else:
+                return results[:top_k]
             
         except Exception as e:
             logger.error(f"Error retrieving context: {str(e)}")
@@ -883,7 +1011,7 @@ class RAGModel:
             return []
     
     def get_context_for_query(self, df: pd.DataFrame, query: str, 
-                              file_id: str = None, top_k: int = 5, 
+                              file_id: str = None, top_k: int = 10, 
                               force_rebuild: bool = False) -> Tuple[str, List[Dict]]:
         """
         Get context for a query from DataFrame
@@ -892,7 +1020,7 @@ class RAGModel:
             df: The DataFrame to search
             query: The query string
             file_id: Optional file ID for caching
-            top_k: Number of results to retrieve
+            top_k: Number of results to retrieve (increased from default 5 to 10)
             force_rebuild: Force rebuilding the index
             
         Returns:
@@ -910,9 +1038,63 @@ class RAGModel:
         if not contexts:
             return "No relevant context found in the data.", []
         
-        # Format context as string
+        # Check for direct event code lookup
+        direct_lookup = None
+        for ctx in contexts:
+            if ctx.get('source') == 'direct_lookup':
+                direct_lookup = ctx
+                break
+        
+        # Format context as string with improved structure
         context_str = "Relevant information from the data:\n\n"
+        
+        # Add direct lookup result first if available
+        if direct_lookup:
+            context_str += "DIRECT LOOKUP RESULT:\n"
+            context_str += direct_lookup['content']
+            context_str += "\n\n"
+        
+        # Add other contexts - using information blocks instead of numbered contexts
         for i, ctx in enumerate(contexts, 1):
-            context_str += f"{i}. {ctx['content']}\n\n"
+            if ctx.get('source') == 'direct_lookup':
+                continue  # Skip, already added above
+                
+            # Add source information for debugging but don't number the contexts
+            source_info = f"[Source: {ctx.get('source', 'unknown')}]"
+            context_str += f"INFORMATION BLOCK:\n"  # Changed from CONTEXT {i}
+            context_str += ctx['content']
+            context_str += "\n\n"
+        
+        # Add metadata about the retrieval process
+        context_str += "RETRIEVAL METADATA:\n"
+        
+        # Count sources
+        source_counts = {}
+        for ctx in contexts:
+            source = ctx.get('source', 'unknown')
+            source_counts[source] = source_counts.get(source, 0) + 1
+        
+        context_str += "Sources: " + ", ".join([f"{k} ({v})" for k, v in source_counts.items()]) + "\n"
+        
+        # Extract event codes mentioned in the context
+        event_codes = set()
+        for ctx in contexts:
+            if 'event_code' in ctx.get('metadata', {}):
+                event_codes.add(str(ctx['metadata']['event_code']))
+            elif 'EVENT_TYPE_CD' in ctx.get('metadata', {}):
+                event_codes.add(str(ctx['metadata']['EVENT_TYPE_CD']))
+        
+        if event_codes:
+            context_str += "Event codes in context: " + ", ".join(sorted(event_codes)) + "\n"
+        
+        # Extract potential event codes from query
+        potential_codes = re.findall(r'\b\d+\b', query)
+        if potential_codes:
+            context_str += "Numbers in query: " + ", ".join(potential_codes) + "\n"
+            
+            # Check which ones are valid event codes
+            valid_codes = [code for code in potential_codes if code in self.metadata["event_codes"]]
+            if valid_codes:
+                context_str += "Valid event codes in query: " + ", ".join(valid_codes) + "\n"
         
         return context_str, contexts
